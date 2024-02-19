@@ -72,6 +72,29 @@ app.delete("/post/:id", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/user", async (req: Request, res: Response) => {
+  try {
+    const result = await prisma.user.create({
+      data: { ...req.body },
+    });
+    res.json(result);
+  } catch (error) {
+    res.json(createError(400));
+  }
+});
+
+app.get("/user/:username", async (req: Request, res: Response) => {
+  try {
+    const { username } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+    });
+    res.json(user);
+  } catch (error) {
+    res.json(createError(400));
+  }
+});
+
 // 404
 app.use((req: Request, res: Response, next: Function) => {
   next(createError(404));
