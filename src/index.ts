@@ -8,6 +8,70 @@ const PORT = 3060;
 
 app.use(express.json());
 
+app.get("/post", async (req: Request, res: Response) => {
+  const posts = await prisma.post.findMany({
+    include: {
+      author: true,
+    },
+  });
+  res.json(posts);
+});
+
+app.post("/post", async (req: Request, res: Response) => {
+  try {
+    const { content, authorEmail } = req.body;
+    const result = await prisma.post.create({
+      data: {
+        content,
+        author: { connect: { email: authorEmail } },
+      },
+    });
+    res.json(result);
+  } catch (error) {
+    res.json(createError(400));
+  }
+});
+
+app.get("/post/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const post = await prisma.post.findUnique({
+      where: { id: Number(id) },
+    });
+    res.json(post);
+  } catch (error) {
+    res.json(createError(400));
+  }
+});
+
+app.put("/post/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const post = await prisma.post.update({
+      where: { id: Number(id) },
+      data: {
+        ...req.body,
+      },
+    });
+
+    res.json(post);
+  } catch (error) {
+    res.json(createError(400));
+  }
+});
+
+app.delete("/post/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const post = await prisma.post.delete({
+      where: { id: Number(id) },
+    });
+    res.json(post);
+  } catch (error) {
+    res.json(createError(400));
+  }
+});
+
 // 404
 app.use((req: Request, res: Response, next: Function) => {
   next(createError(404));
